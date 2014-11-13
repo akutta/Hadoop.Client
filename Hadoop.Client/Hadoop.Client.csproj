@@ -85,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionConfig.cs" />
+    <Compile Include="Hdfs\WebHdfs\Models\WebHDFSResponse.cs" />
     <Compile Include="HttpClientBuilder.cs" />
     <Compile Include="Jobs\HiveJobCreateParameters.cs" />
     <Compile Include="Jobs\Hive\HiveClient.cs" />

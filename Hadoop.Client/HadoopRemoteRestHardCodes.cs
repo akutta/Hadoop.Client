@@ -13,5 +13,7 @@
         internal const string MapReduceJar = "templeton/v1/mapreduce/jar";
         internal const string MapReduceStreaming = "templeton/v1/mapreduce/streaming";
         internal const string EnableLogging = "enablelog";
+
+        internal const string FileExists = "FileAlreadyExistsException";
     }
 }

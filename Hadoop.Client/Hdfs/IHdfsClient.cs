@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using Hadoop.Client.Hdfs.WebHdfs;
 
 namespace Hadoop.Client.Hdfs
 {
@@ -7,7 +8,7 @@ namespace Hadoop.Client.Hdfs
     {
         Task<Stream> OpenFile(string path);
 
-        Task<string> CreateFile(string path, Stream content, bool overwrite);
+        Task<HadoopResponse> CreateFile(string path, Stream content, bool overwrite);
 
         Task<bool> CreateDirectory(string path);
 
