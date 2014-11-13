@@ -21,10 +21,12 @@ namespace Hadoop.Client.Hdfs.WebHdfs
         
         public async Task<Stream> OpenFile(string path)
         {
-            var client = CreateHttpClient();
-            var resp = await client.GetAsync(CreateRequestUri(WebHdfsOperation.OPEN, path, null));
-            resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadAsStreamAsync();
+            using (var client = CreateHttpClient())
+            {
+                var resp = await client.GetAsync(CreateRequestUri(WebHdfsOperation.OPEN, path, null));
+                resp.EnsureSuccessStatusCode();
+                return await resp.Content.ReadAsStreamAsync();
+            }
         }
         
         public async Task<string> CreateFile(string path, Stream content, bool overwrite)
@@ -34,49 +36,56 @@ namespace Hadoop.Client.Hdfs.WebHdfs
                 new KeyValuePair<string, string>("overwrite", overwrite.ToString())
             };
 
-            var client = CreateHttpClient(false);
+            using (var client = CreateHttpClient())
+            {
+                var redir = await client.PutAsync(CreateRequestUri(WebHdfsOperation.CREATE, path, parameters), null);
 
-            var redir = await client.PutAsync(CreateRequestUri(WebHdfsOperation.CREATE, path, parameters), null);
+                content.Position = 0;
+                var fileContent = new StreamContent(content);
+                var create = await client.PutAsync(redir.Headers.Location, fileContent);
+                create.EnsureSuccessStatusCode();
 
-            content.Position = 0;
-            var fileContent = new StreamContent(content);
-            var create = await client.PutAsync(redir.Headers.Location, fileContent);
-            create.EnsureSuccessStatusCode();
-            
-            return create.Headers.Location.ToString();
+                return create.Headers.Location.ToString();
+            }
         }
         
         public async Task<bool> Delete(string path, bool recursive)
         {
-            var client = CreateHttpClient();
+            using (var client = CreateHttpClient())
+            {
+                var parameters = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("recursive", recursive.ToString())
+                };
+                var drop = await client.DeleteAsync(CreateRequestUri(WebHdfsOperation.DELETE, path, parameters));
+                drop.EnsureSuccessStatusCode();
 
-            var parameters = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("recursive", recursive.ToString()) };
-            var drop = await client.DeleteAsync(CreateRequestUri(WebHdfsOperation.DELETE, path, parameters));
-            drop.EnsureSuccessStatusCode();
-
-            var content = await drop.Content.ReadAsAsync<JObject>();
-            return content.Value<bool>("boolean");
+                var content = await drop.Content.ReadAsAsync<JObject>();
+                return content.Value<bool>("boolean");
+            }
         }
         
         public async Task<DirectoryEntry> GetFileStatus(string path)
         {
-            var client = CreateHttpClient();
+            using (var client = CreateHttpClient())
+            {
+                var status = await client.GetAsync(CreateRequestUri(WebHdfsOperation.GETFILESTATUS, path, null));
+                status.EnsureSuccessStatusCode();
 
-            var status = await client.GetAsync(CreateRequestUri(WebHdfsOperation.GETFILESTATUS, path, null));
-            status.EnsureSuccessStatusCode();
+                var filesStatusTask = await status.Content.ReadAsAsync<JObject>();
 
-            var filesStatusTask = await status.Content.ReadAsAsync<JObject>();
-
-            return new DirectoryEntry(filesStatusTask.Value<JObject>("FileStatus"));
+                return new DirectoryEntry(filesStatusTask.Value<JObject>("FileStatus"));
+            }
         }
 
         public async Task<bool> CreateDirectory(string path)
         {
-            var client = CreateHttpClient();
+            using (var client = CreateHttpClient())
+            {
+                var result = await client.PutAsync(CreateRequestUri(WebHdfsOperation.MKDIRS, path, null), null);
 
-            var result = await client.PutAsync(CreateRequestUri(WebHdfsOperation.MKDIRS, path, null), null);
-
-            return result.IsSuccessStatusCode;
+                return result.IsSuccessStatusCode;
+            }
         }
 
         private HttpClient CreateHttpClient(bool allowsAutoRedirect = true)
