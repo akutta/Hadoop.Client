@@ -50,7 +50,8 @@ namespace Hadoop.Client.Tests
 
             var result = CreateApacheHiveClient().Query(hiveQuery).Result;
 
-            Assert.IsNotNullOrEmpty(result);
+            Assert.IsNotNullOrEmpty(result.Results);
+            Assert.IsNullOrEmpty(result.ErrorMessage);
             Console.WriteLine(result);
         }
 
@@ -62,7 +63,8 @@ namespace Hadoop.Client.Tests
             var client = new HiveClient(hdfsClient, hCatalogClient, new HiveClientConfig
             {
                 ResultsFolderBase = @"/tmp/hiveQueries/",
-                StrandardOutputFileName = "stdout"
+                StandardOutputFileName = "stdout",
+                StandardErrorFileName = "stderr"
             });
 
             return client;

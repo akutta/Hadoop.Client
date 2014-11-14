@@ -70,6 +70,11 @@ namespace Hadoop.Client.Jobs
                 await TaskEx.Delay(PollingInterval, cancellationToken);
                 jobDetailsResults = await GetJobWithRetry(client, jobId, cancellationToken);
 
+                Console.WriteLine("Setup:\t{0}\tMap:\t{1}\tReduce:\t{2}\tCleanup:\t{3}",jobDetailsResults.Status.SetupProgress, 
+                    jobDetailsResults.Status.MapProgress,
+                    jobDetailsResults.Status.ReduceProgress,
+                    jobDetailsResults.Status.CleanUpProgress);
+
                 endTime = DateTime.UtcNow;
             }
 
@@ -94,6 +99,7 @@ namespace Hadoop.Client.Jobs
 
         private static bool JobIsNotFinished(JobDetailsResponse jobDetailsResults)
         {
+            if (jobDetailsResults.Status == null) return true;
             return jobDetailsResults.Status.RunState != (int)JobStatusCode.Completed
                    && jobDetailsResults.Status.RunState != (int)JobStatusCode.Failed
                    && jobDetailsResults.Status.RunState != (int)JobStatusCode.Canceled;
@@ -101,6 +107,7 @@ namespace Hadoop.Client.Jobs
 
         private static bool JobIsFinished(JobDetailsResponse jobDetailsResults)
         {
+            if (jobDetailsResults.Status == null) return false;
             return jobDetailsResults.Status.RunState == (int)JobStatusCode.Completed
                    || jobDetailsResults.Status.RunState == (int)JobStatusCode.Failed;
         }

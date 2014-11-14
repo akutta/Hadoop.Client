@@ -10,6 +10,22 @@ namespace Hadoop.Client.Jobs.Models
         [JsonProperty("percentComplete")]
         public string PercentComplete;
 
+        [JsonProperty("userargs")]
+        public UserArguments UserArgs;
+
+    }
+
+    public class UserArguments
+    {
+        [JsonProperty("statusdir")]
+        public string StatusDirectory;
+
+        [JsonProperty("files")]
+        public string Files;
+
+
+        [JsonProperty("file")]
+        public string File;
     }
 
     public class JobStatus
@@ -20,9 +36,12 @@ namespace Hadoop.Client.Jobs.Models
         [JsonProperty("trackingUrl")] 
         public string TrackingUrl;
 
+        [JsonProperty("setupProgress")]
+        public double SetupProgress;
+
         [JsonProperty("mapProgress")]
         public double MapProgress;
-
+        
         [JsonProperty("reduceProgress")]
         public double ReduceProgress;
 

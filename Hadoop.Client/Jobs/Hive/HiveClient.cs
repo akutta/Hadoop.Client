@@ -22,7 +22,7 @@ namespace Hadoop.Client.Jobs.Hive
             _config = config;
         }
 
-        public async Task<string> Query(string hiveQuery)
+        public async Task<JobResults> Query(string hiveQuery)
         {
             var jobIdentifier = Guid.NewGuid();
             string path = Path.Combine(_config.ResultsFolderBase, jobIdentifier + ".output");
@@ -46,7 +46,7 @@ namespace Hadoop.Client.Jobs.Hive
             await _jobClient.WaitForJobCompletionAsync(creationResult, TimeSpan.FromMinutes(5), token);
 
             var rawResult = await ReadResults(path);
-            return reader.Deserialize(rawResult);
+            return reader.Deserialize(rawResult.Results);
         }
 
         private async Task<JobCreationResults> ScheduleNewJob(string hiveQuery, string path, Guid jobIdentifier)
@@ -62,15 +62,32 @@ namespace Hadoop.Client.Jobs.Hive
             return creationResult;
         }
 
-        private async Task<string> ReadResults(string path)
+        private async Task<JobResults> ReadResults(string path)
         {
-            string resultPath = Path.Combine(path, _config.StrandardOutputFileName);
+            var resultPath = Path.Combine(path, _config.StandardOutputFileName);
+            var errorPath = Path.Combine(path, _config.StandardErrorFileName);
 
+
+            return new JobResults
+            {
+                Results = RetrieveJobResults(resultPath).Result,
+                ErrorMessage = RetrieveJobResults(errorPath).Result
+            };
+        }
+
+        private async Task<string> RetrieveJobResults(string resultPath)
+        {
             var queryResult = await _hdfsClient.OpenFile(resultPath);
             using (var reader = new StreamReader(queryResult))
             {
                 return reader.ReadToEnd();
             }
         }
+    }
+
+    public class JobResults
+    {
+        public string Results;
+        public string ErrorMessage;
     }
 }
