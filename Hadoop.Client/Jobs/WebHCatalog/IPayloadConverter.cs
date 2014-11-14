@@ -1,4 +1,6 @@
-﻿namespace Hadoop.Client.Jobs.WebHCatalog
+﻿using Hadoop.Client.Jobs.Models;
+
+namespace Hadoop.Client.Jobs.WebHCatalog
 {
     public interface IPayloadConverter : IPayloadSeriazlier, IPlayloadDeserializer
     {
@@ -21,7 +23,7 @@
     {
         JobList DeserializeListJobResult(string result);
 
-        JobDetails DeserializeJobDetails(string result);
+        JobDetailsResponse DeserializeJobDetails(string result);
 
         string DeserializeJobSubmissionResponse(string result);
     }

@@ -18,7 +18,7 @@ namespace Hadoop.Client.Jobs
     /// Enum for the possible jobDetails states. These values are tied/sourced from Tempelton. 
     /// DO NOT UPDATE/CHANGE unless the values returned from Tempelton have changed. 
     /// </summary>
-    public enum JobStatusCode
+    public enum JobStatusCode : int
     {
         /// <summary>
         /// Indicates the jobDetails is running.

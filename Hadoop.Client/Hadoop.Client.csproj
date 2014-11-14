@@ -100,6 +100,7 @@
     <Compile Include="Jobs\JobList.cs" />
     <Compile Include="Jobs\JobStatusCode.cs" />
     <Compile Include="Jobs\MapReduceJobCreateParameters.cs" />
+    <Compile Include="Jobs\Models\JobDetailsResponse.cs" />
     <Compile Include="Jobs\PigJobCreateParameters.cs" />
     <Compile Include="Jobs\SqoopJobCreateParameters.cs" />
     <Compile Include="Jobs\StreamingMapReduceJobCreateParameters.cs" />

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Hadoop.Client.Jobs.Models;
 
 namespace Hadoop.Client.Jobs
 {
@@ -6,7 +7,7 @@ namespace Hadoop.Client.Jobs
     {
         Task<JobList> ListJobs();
 
-        Task<JobDetails> GetJob(string jobId);
+        Task<JobDetailsResponse> GetJob(string jobId);
 
         Task<JobCreationResults> SubmitMapReduceJob(MapReduceJobCreateParameters details);
 
@@ -18,6 +19,6 @@ namespace Hadoop.Client.Jobs
 
         Task<JobCreationResults> SubmitStreamingJob(StreamingMapReduceJobCreateParameters pigJobCreateParameters);
 
-        Task<JobDetails> StopJob(string jobId);
+        Task<JobDetailsResponse> StopJob(string jobId);
     }
 }

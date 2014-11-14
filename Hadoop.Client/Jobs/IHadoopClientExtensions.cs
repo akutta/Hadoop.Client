@@ -16,6 +16,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Hadoop.Client.Jobs.Models;
 
 namespace Hadoop.Client.Jobs
 {
@@ -37,7 +38,7 @@ namespace Hadoop.Client.Jobs
         /// The Cancellation Token for the request.
         /// </param>
         /// <returns>An awaitable task that represents the action.</returns>
-        public static async Task<JobDetails> WaitForJobCompletionAsync(
+        public static async Task<JobDetailsResponse> WaitForJobCompletionAsync(
             this IHadoopJobClient client, JobCreationResults job, TimeSpan duration, CancellationToken cancellationToken)
         {
             return await client.WaitForJobCompletionAsync(job.JobId, duration, cancellationToken);
@@ -53,10 +54,10 @@ namespace Hadoop.Client.Jobs
         /// The Cancellation Token for the request.
         /// </param>
         /// <returns>An awaitable task that represents the action.</returns>
-        public static async Task<JobDetails> WaitForJobCompletionAsync(
+        public static async Task<JobDetailsResponse> WaitForJobCompletionAsync(
             this IHadoopJobClient client, string jobId, TimeSpan duration, CancellationToken cancellationToken)
         {
-            var jobDetailsResults = new JobDetails {JobId = jobId, StatusCode = JobStatusCode.Unknown};
+            var jobDetailsResults = new JobDetailsResponse();
 
             var startTime = DateTime.UtcNow;
             var endTime = DateTime.UtcNow;
@@ -78,7 +79,7 @@ namespace Hadoop.Client.Jobs
             return jobDetailsResults;
         }
 
-        private static bool ShouldRetryAgain(TimeSpan duration, JobDetails jobDetailsResults,
+        private static bool ShouldRetryAgain(TimeSpan duration, JobDetailsResponse jobDetailsResults,
             DateTime endTime, DateTime startTime)
         {
             return jobDetailsResults != null
@@ -91,17 +92,17 @@ namespace Hadoop.Client.Jobs
             return (endTime - startTime) >= duration;
         }
 
-        private static bool JobIsNotFinished(JobDetails jobDetailsResults)
+        private static bool JobIsNotFinished(JobDetailsResponse jobDetailsResults)
         {
-            return jobDetailsResults.StatusCode != JobStatusCode.Completed
-                   && jobDetailsResults.StatusCode != JobStatusCode.Failed
-                   && jobDetailsResults.StatusCode != JobStatusCode.Canceled;
+            return jobDetailsResults.Status.RunState != (int)JobStatusCode.Completed
+                   && jobDetailsResults.Status.RunState != (int)JobStatusCode.Failed
+                   && jobDetailsResults.Status.RunState != (int)JobStatusCode.Canceled;
         }
 
-        private static bool JobIsFinished(JobDetails jobDetailsResults)
+        private static bool JobIsFinished(JobDetailsResponse jobDetailsResults)
         {
-            return jobDetailsResults.StatusCode == JobStatusCode.Completed
-                   || jobDetailsResults.StatusCode == JobStatusCode.Failed;
+            return jobDetailsResults.Status.RunState == (int)JobStatusCode.Completed
+                   || jobDetailsResults.Status.RunState == (int)JobStatusCode.Failed;
         }
 
         /// <summary>
@@ -114,7 +115,7 @@ namespace Hadoop.Client.Jobs
         /// The Cancellation Token for the request.
         /// </param>
         /// <returns>The jobDetails's pigJobCreateParameters.</returns>
-        public static JobDetails WaitForJobCompletion(
+        public static JobDetailsResponse WaitForJobCompletion(
             this IHadoopJobClient client, JobCreationResults job, TimeSpan duration, CancellationToken cancellationToken)
         {
             return WaitForJobCompletionAsync(client, job, duration, cancellationToken).Result;
@@ -135,10 +136,10 @@ namespace Hadoop.Client.Jobs
             }
         }
 
-        private static async Task<JobDetails> GetJobWithRetry(IHadoopJobClient client, string jobId,
+        private static async Task<JobDetailsResponse> GetJobWithRetry(IHadoopJobClient client, string jobId,
             CancellationToken cancellationToken)
         {
-            JobDetails jobDetailsResults = null;
+            JobDetailsResponse jobDetailsResults = null;
 
             int retryCount = 0;
 

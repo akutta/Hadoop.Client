@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Hadoop.Client.Jobs.Models;
 using Hadoop.Client.Jobs.WebHCatalog.Data;
 
 namespace Hadoop.Client.Jobs.WebHCatalog
@@ -28,7 +29,7 @@ namespace Hadoop.Client.Jobs.WebHCatalog
             return _converter.DeserializeListJobResult(result);
         }
 
-        public async Task<JobDetails> GetJob(string jobId)
+        public async Task<JobDetailsResponse> GetJob(string jobId)
         {
             var relative =
                 new Uri(
@@ -110,7 +111,7 @@ namespace Hadoop.Client.Jobs.WebHCatalog
             return new JobCreationResults { JobId = _converter.DeserializeJobSubmissionResponse(result) };
         }
 
-        public async Task<JobDetails> StopJob(string jobId)
+        public async Task<JobDetailsResponse> StopJob(string jobId)
         {
             var relative = new Uri(
                 HadoopRemoteRestConstants.Jobs + "/" +

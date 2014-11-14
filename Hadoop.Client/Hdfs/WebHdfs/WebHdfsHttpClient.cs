@@ -43,7 +43,7 @@ namespace Hadoop.Client.Hdfs.WebHdfs
                 var redir = await client.PutAsync(CreateRequestUri(WebHdfsOperation.CREATE, path, parameters), null);
                 content.Position = 0;
                 var fileContent = new StreamContent(content);
-                var create = await client.PutAsync(redir.Headers.Location, fileContent);
+                var create = client.PutAsync(redir.Headers.Location, fileContent).Result;
 
                 var responseString = string.Empty;
                 if (create.Headers.Location != null)
@@ -92,8 +92,9 @@ namespace Hadoop.Client.Hdfs.WebHdfs
             using (var client = CreateHttpClient())
             {
                 var result = await client.PutAsync(CreateRequestUri(WebHdfsOperation.MKDIRS, path, null), null);
+                var response = ParseResponse(await result.Content.ReadAsStringAsync());
 
-                return result.IsSuccessStatusCode;
+                return response.BooleanValue;
             }
         }
 

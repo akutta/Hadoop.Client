@@ -1,19 +1,19 @@
 ﻿using System;
-using FluentAssertions;
 using Hadoop.Client.Hdfs.WebHdfs;
 using Hadoop.Client.Jobs;
 using Hadoop.Client.Jobs.Hive;
 using Hadoop.Client.Jobs.WebHCatalog;
-using Xunit;
+using NUnit.Framework;
 
 namespace Hadoop.Client.Tests
 {
+    [TestFixture]
     public class JobSchedulingTests
     {
         private const string WebHcatBase = @"http://sandbox.hortonworks.com:50111/";
         private const string WebHdfsBase = @"http://sandbox.hortonworks.com:50070/";
 
-        [Fact]
+        [Test]
         public void schedule_hive_job()
         {
             var client = new WebHCatalogJobClient(Connect.WithTestUser(to: WebHcatBase));
@@ -36,27 +36,21 @@ namespace Hadoop.Client.Tests
 
             var result = client.SubmitHiveJob(job).Result;
 
-            result.JobId.Should().NotBeNullOrEmpty();
-            Console.WriteLine(result.JobId);
+            Assert.IsNotNullOrEmpty(result.JobId);
         }
 
-        [Fact]
+        [Test]
         public void execute_hive_query()
         {
             const string hiveQuery = @"
-                SELECT s07.description, s07.total_emp, s08.total_emp, s07.salary
-                    FROM
-                      sample_07 s07 JOIN 
-                      sample_08 s08
-                    ON ( s07.code = s08.code )
-                    WHERE
-                    ( s07.total_emp > s08.total_emp
-                     AND s07.salary > 100000 )
-                    SORT BY s07.salary DESC";
+                SELECT description, total_emp, salary
+                    FROM sample_07
+                    WHERE salary > 100000
+                    SORT BY salary DESC";
 
             var result = CreateApacheHiveClient().Query(hiveQuery).Result;
 
-            result.Should().NotBeNullOrEmpty();
+            Assert.IsNotNullOrEmpty(result);
             Console.WriteLine(result);
         }
 

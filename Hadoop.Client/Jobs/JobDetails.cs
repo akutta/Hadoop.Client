@@ -89,10 +89,5 @@ namespace Hadoop.Client.Jobs
         /// Gets or sets the percentage completion of the job.
         /// </summary>
         public string PercentComplete { get; set; }
-
-        /// <summary>
-        /// Gets or sets the uri to call when this job completes.
-        /// </summary>
-        public string Callback { get; set; }
     }
 }

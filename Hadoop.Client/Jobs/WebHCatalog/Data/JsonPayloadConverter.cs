@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Hadoop.Client.Jobs.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Hadoop.Client.Jobs.WebHCatalog.Data
@@ -83,20 +85,9 @@ namespace Hadoop.Client.Jobs.WebHCatalog.Data
             throw new NotImplementedException();
         }
 
-        public JobDetails DeserializeJobDetails(string payload)
+        public JobDetailsResponse DeserializeJobDetails(string payload)
         {
-            var job = JObject.Parse(payload);
-            var status = job[StatusPropertyName];
-
-            //TODO: thats not everything
-            return new JobDetails
-            {
-                Callback = job[UserArgsPropertyName].Value<string>(Callback),
-                JobId = status.Value<string>(JobId),
-                ExitCode = job.Value<int?>(ExitValuePropertyName),
-                SubmissionTime = _unixEpoch.AddMilliseconds(status.Value<int>(StartTimePropertyName)),
-                StatusCode = GetStatusCode(status),
-            };
+            return JsonConvert.DeserializeObject<JobDetailsResponse>(payload);
         }
 
         private static JobStatusCode GetStatusCode(JToken status)
