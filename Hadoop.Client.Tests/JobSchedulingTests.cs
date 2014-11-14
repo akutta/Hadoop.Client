@@ -38,7 +38,7 @@ namespace Hadoop.Client.Tests
 
             Assert.IsNotNullOrEmpty(result.JobId);
         }
-
+        
         [Test]
         public void execute_hive_query()
         {
@@ -50,8 +50,8 @@ namespace Hadoop.Client.Tests
 
             var result = CreateApacheHiveClient().Query(hiveQuery).Result;
 
-            Assert.IsNotNullOrEmpty(result.Results);
-            Assert.IsNullOrEmpty(result.ErrorMessage);
+            Assert.IsNotNullOrEmpty(result.Results, "No Results Found");
+            Assert.IsNotNullOrEmpty(result.JobLog, "Job Log not Properly Read");
             Console.WriteLine(result);
         }
 

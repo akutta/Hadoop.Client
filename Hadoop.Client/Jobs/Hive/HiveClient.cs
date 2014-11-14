@@ -25,7 +25,7 @@ namespace Hadoop.Client.Jobs.Hive
         public async Task<JobResults> Query(string hiveQuery)
         {
             var jobIdentifier = Guid.NewGuid();
-            string path = Path.Combine(_config.ResultsFolderBase, jobIdentifier + ".output");
+            var path = Path.Combine(_config.ResultsFolderBase, jobIdentifier + ".output");
 
             var creationResult = await ScheduleNewJob(hiveQuery, path, jobIdentifier);
 
@@ -37,16 +37,8 @@ namespace Hadoop.Client.Jobs.Hive
 
         public async Task<IEnumerable<TResult>> Query<TResult>(string hiveQuery, IReadResults<TResult> reader)
         {
-            var jobIdentifier = Guid.NewGuid();
-            string path = Path.Combine(_config.ResultsFolderBase, jobIdentifier + ".output");
-
-            var creationResult = await ScheduleNewJob(hiveQuery, path, jobIdentifier);
-
-            var token = new CancellationToken(false);
-            await _jobClient.WaitForJobCompletionAsync(creationResult, TimeSpan.FromMinutes(5), token);
-
-            var rawResult = await ReadResults(path);
-            return reader.Deserialize(rawResult.Results);
+            var result = await Query(hiveQuery);
+            return reader.Deserialize(result.Results);
         }
 
         private async Task<JobCreationResults> ScheduleNewJob(string hiveQuery, string path, Guid jobIdentifier)
@@ -67,11 +59,10 @@ namespace Hadoop.Client.Jobs.Hive
             var resultPath = Path.Combine(path, _config.StandardOutputFileName);
             var errorPath = Path.Combine(path, _config.StandardErrorFileName);
 
-
             return new JobResults
             {
-                Results = RetrieveJobResults(resultPath).Result,
-                ErrorMessage = RetrieveJobResults(errorPath).Result
+                Results = await RetrieveJobResults(resultPath),
+                JobLog = await RetrieveJobResults(errorPath)
             };
         }
 
@@ -88,6 +79,6 @@ namespace Hadoop.Client.Jobs.Hive
     public class JobResults
     {
         public string Results;
-        public string ErrorMessage;
+        public string JobLog;
     }
 }
