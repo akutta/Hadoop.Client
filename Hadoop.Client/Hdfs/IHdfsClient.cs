@@ -8,7 +8,7 @@ namespace Hadoop.Client.Hdfs
     {
         Task<Stream> OpenFile(string path);
 
-        Task<HadoopResponse> CreateFile(string path, Stream content, bool overwrite);
+        Task<HadoopResponse> CreateFile(string path, Stream stream, bool overwrite);
 
         Task<bool> CreateDirectory(string path);
 

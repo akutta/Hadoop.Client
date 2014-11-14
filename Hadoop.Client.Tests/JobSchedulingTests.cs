@@ -1,5 +1,4 @@
-﻿using System;
-using Hadoop.Client.Hdfs.WebHdfs;
+﻿using Hadoop.Client.Hdfs.WebHdfs;
 using Hadoop.Client.Jobs;
 using Hadoop.Client.Jobs.Hive;
 using Hadoop.Client.Jobs.WebHCatalog;
@@ -52,7 +51,6 @@ namespace Hadoop.Client.Tests
 
             Assert.IsNotNullOrEmpty(result.Results, "No Results Found");
             Assert.IsNotNullOrEmpty(result.JobLog, "Job Log not Properly Read");
-            Console.WriteLine(result);
         }
 
         private static HiveClient CreateApacheHiveClient()

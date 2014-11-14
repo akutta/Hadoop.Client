@@ -70,10 +70,11 @@ namespace Hadoop.Client.Jobs
                 await TaskEx.Delay(PollingInterval, cancellationToken);
                 jobDetailsResults = await GetJobWithRetry(client, jobId, cancellationToken);
 
+                /*
                 Console.WriteLine("Setup:\t{0}\tMap:\t{1}\tReduce:\t{2}\tCleanup:\t{3}",jobDetailsResults.Status.SetupProgress, 
                     jobDetailsResults.Status.MapProgress,
                     jobDetailsResults.Status.ReduceProgress,
-                    jobDetailsResults.Status.CleanUpProgress);
+                    jobDetailsResults.Status.CleanUpProgress);*/
 
                 endTime = DateTime.UtcNow;
             }

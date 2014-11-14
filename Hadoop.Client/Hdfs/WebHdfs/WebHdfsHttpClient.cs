@@ -31,7 +31,7 @@ namespace Hadoop.Client.Hdfs.WebHdfs
             }
         }
         
-        public async Task<HadoopResponse> CreateFile(string path, Stream content, bool overwrite)
+        public async Task<HadoopResponse> CreateFile(string path, Stream stream, bool overwrite)
         {           
             var parameters = new List<KeyValuePair<string, string>>
             {
@@ -41,18 +41,20 @@ namespace Hadoop.Client.Hdfs.WebHdfs
             using (var client = CreateHttpClient(false))
             {
                 var redir = await client.PutAsync(CreateRequestUri(WebHdfsOperation.CREATE, path, parameters), null);
-                content.Position = 0;
-                var fileContent = new StreamContent(content);
+                stream.Position = 0;
+                var fileContent = new StreamContent(stream);
                 var create = client.PutAsync(redir.Headers.Location, fileContent).Result;
 
                 var responseString = string.Empty;
                 if (create.Headers.Location != null)
                     responseString = create.Headers.Location.ToString();
 
+                var content = create.Content.ReadAsStringAsync().Result;
+
                 return new HadoopResponse
                 {
                     Response = responseString,
-                    RemoteException = ParseResponse(create.Content.ReadAsStringAsync().Result)
+                    RemoteException = ParseResponse(content).RemoteException
                 };
             }
         }
@@ -69,8 +71,7 @@ namespace Hadoop.Client.Hdfs.WebHdfs
                 var drop = await client.DeleteAsync(CreateRequestUri(WebHdfsOperation.DELETE, path, parameters));
                 drop.EnsureSuccessStatusCode();
 
-                var content = await drop.Content.ReadAsAsync<JObject>();
-                return content.Value<bool>("boolean");
+                return ParseResponse(drop.Content.ReadAsStringAsync().Result).BooleanValue;
             }
         }
         
@@ -125,17 +126,15 @@ namespace Hadoop.Client.Hdfs.WebHdfs
             return uri;
         }
 
-        private WebHDFSResponse ParseResponse(string reason)
+        private static WebHDFSResponse ParseResponse(string reason)
         {
-            if (String.IsNullOrEmpty(reason)) return null;
-            return JsonConvert.DeserializeObject<WebHDFSResponse>(reason);
+            return String.IsNullOrEmpty(reason) ? new WebHDFSResponse() : JsonConvert.DeserializeObject<WebHDFSResponse>(reason);
         }
-
     }
 
     public class HadoopResponse
     {
-        public WebHDFSResponse RemoteException;
+        public RemoteExceptionModel RemoteException;
         public string Response;
 
     }

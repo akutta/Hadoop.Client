@@ -8,7 +8,9 @@ namespace Hadoop.Client.Tests
     {
         //
         //  Ensure that you have the following entry in your hosts file (Windows:  C:\Windows\System32\drivers\etc\hosts )
-        //      127.0.0.1 sandbox.hortonworks.com
+        //      127.0.0.1 sandbox.hortonworks.com 
+        //                  or 
+        //      10.0.2.15 sandbox.hortonworks.com
         //
         private const string WebHdfsBase = @"http://sandbox.hortonworks.com:50070/";
         private const string FileHdfsPath = "/user/hue/jobsub/sample_data/sonnets.txt";
