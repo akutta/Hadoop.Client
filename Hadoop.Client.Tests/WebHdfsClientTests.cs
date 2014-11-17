@@ -1,4 +1,6 @@
-﻿using Hadoop.Client.Hdfs.WebHdfs;
+﻿using System;
+using System.IO;
+using Hadoop.Client.Hdfs.WebHdfs;
 using NUnit.Framework;
 
 namespace Hadoop.Client.Tests
@@ -40,10 +42,10 @@ namespace Hadoop.Client.Tests
 
             file.Position = 0;
             var result = _hdfsClient.CreateFile(FileHdfsPath, file, true).Result;
+            //var result = _hdfsClient.CreateFile(GetTestFileName(), file, true).Result;
             Assert.IsNull(result.RemoteException);
             Assert.IsNotNullOrEmpty(result.Response);
         }
-
 
         [Test]
         public void write_existing_file_to_disk_has_remote_exception()
@@ -57,6 +59,37 @@ namespace Hadoop.Client.Tests
 
             Assert.IsNotNull(result.RemoteException);
             Assert.IsNullOrEmpty(result.Response);
+        }
+
+        [Test]
+        public void create_new_file_and_append_to_hdfs()
+        {
+            var appendedText = Guid.NewGuid().ToString();
+
+            var file = _hdfsClient.OpenFile(FileHdfsPath).Result;
+            var createFileResult = _hdfsClient.CreateFile(GetTestFileName(), file, true).Result;
+            var appendedFileResult = _hdfsClient.AppendToFile(GetTestFileName(), appendedText).Result;
+
+            Assert.IsNull(createFileResult.RemoteException);
+            Assert.IsNotNullOrEmpty(createFileResult.Response);
+            Assert.IsNull(appendedFileResult.RemoteException);
+            Assert.IsNullOrEmpty(appendedFileResult.Response); // The response doesn't contain any information
+
+
+            var appendedFile = _hdfsClient.OpenFile(GetTestFileName()).Result;
+            appendedFile.Position = 0;
+            using (var reader = new StreamReader(appendedFile))
+            {
+                var fileContents = reader.ReadToEnd();
+                Assert.IsTrue(fileContents.Length > appendedText.Length, "Retrieved file contents does not have enough contents");
+                Assert.IsTrue(fileContents.Contains(appendedText), "Retrieved file contents did not contain the appended text");
+            }
+
+        }
+
+        private static string GetTestFileName()
+        {
+            return FileHdfsPath + ".test";
         }
 
         [Test]

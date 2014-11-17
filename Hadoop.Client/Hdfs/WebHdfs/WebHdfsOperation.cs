@@ -7,6 +7,7 @@
         CREATE,
         DELETE,
         GETFILESTATUS,
-        MKDIRS
+        MKDIRS,
+        APPEND
     }
 }
