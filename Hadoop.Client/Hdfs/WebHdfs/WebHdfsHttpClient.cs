@@ -112,16 +112,15 @@ namespace Hadoop.Client.Hdfs.WebHdfs
             }
         }
         
-        public async Task<DirectoryEntry> GetFileStatus(string path)
+        public async Task<FileStatusModel> GetFileStatus(string path)
         {
             using (var client = CreateHttpClient())
             {
                 var status = await PerformWebOperation(WebHdfsOperation.GETFILESTATUS, client, path);
                 status.EnsureSuccessStatusCode();
 
-                var filesStatusTask = await status.Content.ReadAsAsync<JObject>();
-
-                return new DirectoryEntry(filesStatusTask.Value<JObject>("FileStatus"));
+                var response = ParseResponse(await status.Content.ReadAsStringAsync());
+                return response.FileStatus;
             }
         }
 

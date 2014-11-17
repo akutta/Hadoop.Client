@@ -98,5 +98,12 @@ namespace Hadoop.Client.Tests
             Assert.IsTrue(_hdfsClient.CreateDirectory("/abc2").Result);
         }
 
+        [Test]
+        public void can_get_file_status()
+        {
+            var result = _hdfsClient.GetFileStatus(FileHdfsPath).Result;
+            Console.WriteLine(result);
+        }
+
     }
 }

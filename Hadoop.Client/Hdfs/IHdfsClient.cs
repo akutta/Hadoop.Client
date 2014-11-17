@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using Hadoop.Client.Hdfs.WebHdfs;
+using Hadoop.Client.Hdfs.WebHdfs.Models;
 
 namespace Hadoop.Client.Hdfs
 {
@@ -14,6 +15,6 @@ namespace Hadoop.Client.Hdfs
 
         Task<bool> Delete(string path, bool recursive);
 
-        Task<DirectoryEntry> GetFileStatus(string path);        
+        Task<FileStatusModel> GetFileStatus(string path);        
     }
 }
