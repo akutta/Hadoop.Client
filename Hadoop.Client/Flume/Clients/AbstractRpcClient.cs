@@ -1,21 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using Hadoop.Client.Flume.Event;
+using Hadoop.Client.Flume.Exceptions;
 
 namespace Hadoop.Client.Flume.Clients
 {
+    internal enum ConnState
+    {
+        Ready,
+        Dead
+    }
+
     abstract class AbstractRpcClient : IRpcClient
     {
         protected int BatchSize = RpcClientConfigurationConstants.DefaultBatchSize;
         protected long ConnectTimeout = RpcClientConfigurationConstants.DefaultConnectTimeoutMillis;
         protected long RequestTimeout = RpcClientConfigurationConstants.DefaultRequestTimeoutMillis;
 
+        private readonly object _stateLock = new object();
+        private ConnState _connState;
+
         public int GetBatchSize()
         {
             return BatchSize;
         }
 
-        protected abstract void Configure();
+        protected abstract void Configure(ClientConfiguration properties);
 
         public abstract void Append(IEvent newEvent);
 
@@ -25,6 +35,40 @@ namespace Hadoop.Client.Flume.Clients
 
         public abstract void Close();
 
+        protected void AssertReady()
+        {
+            lock (_stateLock)
+            {
+                var curState = _connState;
+                if (curState != ConnState.Ready)
+                {
+                    throw new EventDeliveryException("RPC failed, client in an invalid state: " + curState);
+                }
+            }
+        }
+
+        protected void AssertNotConfigured()
+        {
+            lock (_stateLock)
+            {
+                var curState = _connState;
+                if ( curState == ConnState.Ready || curState == ConnState.Dead ) 
+                    throw new FlumeException("This client was already configured, cannot reconfigure");
+            }
+        }
+
+        protected void SetState(ConnState newState)
+        {
+            lock (_stateLock)
+            {
+                if (_connState == ConnState.Dead && _connState != newState)
+                {
+                    throw new IllegalStateException("Cannot transition from CLOSED state.");
+                }
+
+                _connState = newState;
+            }
+        }
 
         public void Dispose()
         {

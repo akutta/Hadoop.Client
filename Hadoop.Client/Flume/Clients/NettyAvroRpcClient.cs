@@ -7,12 +7,11 @@ namespace Hadoop.Client.Flume.Clients
 {
     class NettyAvroRpcClient : AbstractRpcClient
     {
-        private readonly object _stateLock = new object();
-        private ConnState _connState;
 
-        protected override void Configure()
+        protected override void Configure(ClientConfiguration properties)
         {
-            throw new System.NotImplementedException();
+            AssertNotConfigured();
+            Connect();
         }
 
         public override void Append(IEvent newEvent)
@@ -50,46 +49,16 @@ namespace Hadoop.Client.Flume.Clients
 
         private void Connect()
         {
-            
             SetState(ConnState.Ready);
+
+
         }
 
         private void AppendBatch(IEnumerable<IEvent> events, long timeout)
         {
             AssertReady();
-
-
         }
 
-        private void AssertReady()
-        {
-            lock (_stateLock)
-            {
-                var curState = _connState;
-                if (curState != ConnState.Ready)
-                {
-                    throw new EventDeliveryException("RPC failed, client in an invalid state: " + curState);
-                }
-            }
-        }
-
-        private void SetState(ConnState newState)
-        {
-            lock (_stateLock)
-            {
-                if (_connState == ConnState.Dead && _connState != newState)
-                {
-                    throw new IllegalStateException("Cannot transition from CLOSED state.");
-                }
-
-                _connState = newState;
-            }
-        }
     }
 
-    internal enum ConnState
-    {
-        Ready,
-        Dead
-    }
 }
