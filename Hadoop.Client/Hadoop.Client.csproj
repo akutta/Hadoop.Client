@@ -85,6 +85,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionConfig.cs" />
+    <Compile Include="Flume\Clients\NettyAvroRpcClient.cs" />
+    <Compile Include="Flume\Event\IEvent.cs" />
+    <Compile Include="Flume\Exceptions\EventDeliveryException.cs" />
+    <Compile Include="Flume\Exceptions\FlumeException.cs" />
+    <Compile Include="Flume\IRPCClient.cs" />
     <Compile Include="Hdfs\WebHdfs\Models\WebHDFSResponse.cs" />
     <Compile Include="HttpClientBuilder.cs" />
     <Compile Include="Jobs\HiveJobCreateParameters.cs" />
@@ -118,7 +123,9 @@
     <Compile Include="Hdfs\WebHdfs\WebHdfsHttpClient.cs" />
     <Compile Include="Hdfs\WebHdfs\WebHdfsOperation.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Flume\Models\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Hadoop.Client.nuspec" />
