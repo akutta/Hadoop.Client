@@ -85,10 +85,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionConfig.cs" />
+    <Compile Include="Flume\Clients\AbstractRpcClient.cs" />
     <Compile Include="Flume\Clients\NettyAvroRpcClient.cs" />
     <Compile Include="Flume\Event\IEvent.cs" />
     <Compile Include="Flume\Exceptions\EventDeliveryException.cs" />
     <Compile Include="Flume\Exceptions\FlumeException.cs" />
+    <Compile Include="Flume\Exceptions\IllegalStateException.cs" />
     <Compile Include="Flume\IRPCClient.cs" />
     <Compile Include="Hdfs\WebHdfs\Models\WebHDFSResponse.cs" />
     <Compile Include="HttpClientBuilder.cs" />

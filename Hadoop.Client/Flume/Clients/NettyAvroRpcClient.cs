@@ -1,45 +1,95 @@
 ﻿using System;
 using System.Collections.Generic;
 using Hadoop.Client.Flume.Event;
+using Hadoop.Client.Flume.Exceptions;
 
 namespace Hadoop.Client.Flume.Clients
 {
-    class NettyAvroRpcClient : IRpcClient
+    class NettyAvroRpcClient : AbstractRpcClient
     {
-        private Uri address;
-        public void Dispose()
+        private readonly object _stateLock = new object();
+        private ConnState _connState;
+
+        protected override void Configure()
         {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
-        public int GetBatchSize()
+        public override void Append(IEvent newEvent)
         {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
-        public void Append(IEvent newEvent)
+        public override void AppendBatch(IEnumerable<IEvent> events)
         {
-            throw new NotImplementedException();
+            try
+            {
+                AppendBatch(events, RequestTimeout);
+            }
+            catch (Exception exception)
+            {
+                SetState(ConnState.Dead);
+                if (exception is TimeoutException)
+                {
+                    throw new EventDeliveryException("Failed to send event.\tRPC request timed out after " + RequestTimeout + " ms");
+                }
+                throw new EventDeliveryException("Failed to send batch");
+            }
         }
 
-        public void AppendBatch(IEnumerable<IEvent> events)
+        public override bool IsActive()
         {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
-        public bool IsActive()
+        public override void Close()
         {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
-        public void Close()
+
+        private void Connect()
         {
-            throw new NotImplementedException();
+            
+            SetState(ConnState.Ready);
         }
 
-        public override string ToString()
+        private void AppendBatch(IEnumerable<IEvent> events, long timeout)
         {
-            return "NettyAvroRpcClient { host: " + address.Host + ", port: " + address.Port + " }";
+            AssertReady();
+
+
         }
+
+        private void AssertReady()
+        {
+            lock (_stateLock)
+            {
+                var curState = _connState;
+                if (curState != ConnState.Ready)
+                {
+                    throw new EventDeliveryException("RPC failed, client in an invalid state: " + curState);
+                }
+            }
+        }
+
+        private void SetState(ConnState newState)
+        {
+            lock (_stateLock)
+            {
+                if (_connState == ConnState.Dead && _connState != newState)
+                {
+                    throw new IllegalStateException("Cannot transition from CLOSED state.");
+                }
+
+                _connState = newState;
+            }
+        }
+    }
+
+    internal enum ConnState
+    {
+        Ready,
+        Dead
     }
 }
