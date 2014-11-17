@@ -51,22 +51,7 @@ namespace Hadoop.Client.Hdfs.WebHdfs
         {
             using (var client = CreateHttpClient(false))
             {
-                var requestUri = CreateRequestUri(WebHdfsOperation.APPEND, path, null);
-                var redir = await client.PostAsync(requestUri, null);
-                var fileContent = GetFileContent(stream);
-                var create = client.PostAsync(redir.Headers.Location, fileContent).Result;
-
-                var responseString = string.Empty;
-                if (create.Headers.Location != null)
-                    responseString = create.Headers.Location.ToString();
-
-                var content = create.Content.ReadAsStringAsync().Result;
-
-                return new HadoopResponse
-                {
-                    Response = responseString,
-                    RemoteException = ParseResponse(content).RemoteException
-                };
+                return await CreateOrAppendFile(WebHdfsOperation.APPEND, path, stream, client, null);
             }
         }
 
